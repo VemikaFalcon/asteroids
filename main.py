@@ -1,6 +1,6 @@
 import pygame
 import sys
-from constants import SCREEN_HEIGHT, SCREEN_WIDTH
+from constants import SCREEN_HEIGHT, SCREEN_WIDTH, calculate_points
 from logger import log_state, log_event
 from player import Player
 from asteroid import Asteroid
@@ -10,6 +10,8 @@ from shot import Shot
 
 def main() -> None:
     pygame.init()
+    pygame.font.init()
+    score_font = pygame.font.Font(None, 36)
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
     updatable = pygame.sprite.Group()
@@ -23,28 +25,33 @@ def main() -> None:
     asteroidfield = AsteroidField()
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     dt = 0.0
+    current_score = 0
 
     while True:
-        log_state()
+        # log_state()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
 
         screen.fill("black")
+        score_surface = score_font.render(f"Score: {current_score}", True, ("white"))
+        screen.blit(score_surface, (10, 10))
         updatable.update(dt)
         for object in drawable:
             object.draw(screen)
         for asteroid in asteroids:
             for shot in shots:
                 if asteroid.collides_with(shot) == True:
-                    log_event("asteroid_shot")
+                    # log_event("asteroid_shot")
                     shot.kill()
+                    current_score += calculate_points(asteroid.radius)
                     asteroid.split()
         for asteroid in asteroids:
             if asteroid.collides_with(player) == True:
-                log_event("player_hit")
+                # log_event("player_hit")
                 print("Game over!")
+                print(f"Final Score: {current_score}")
                 sys.exit()
         pygame.display.flip()
 

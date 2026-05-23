@@ -12,5 +12,18 @@ ASTEROID_SPAWN_RATE_SECONDS = 0.8
 ASTEROID_MAX_RADIUS = ASTEROID_MIN_RADIUS * ASTEROID_KINDS
 
 SHOT_RADIUS = 5
+SHOT_LIFETIME = 2.0
 PLAYER_SHOOT_SPEED = 500
 PLAYER_SHOOT_COOLDOWN_SECONDS = 0.3
+
+SCORING_TABLE = [
+    (ASTEROID_MIN_RADIUS, 100),
+    (ASTEROID_MIN_RADIUS * 2, 70),
+    (float('inf'), 50)
+]
+
+def calculate_points(radius):
+    for max_radius, score in SCORING_TABLE:
+        if radius <= max_radius:
+            return score
+    return 0

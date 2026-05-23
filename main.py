@@ -40,7 +40,7 @@ def main() -> None:
                 if asteroid.collides_with(shot) == True:
                     log_event("asteroid_shot")
                     shot.kill()
-                    asteroid.kill()
+                    asteroid.split()
         for asteroid in asteroids:
             if asteroid.collides_with(player) == True:
                 log_event("player_hit")

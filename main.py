@@ -26,6 +26,7 @@ def main() -> None:
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     dt = 0.0
     current_score = 0
+    lives = 3
 
     while True:
         # log_state()
@@ -37,6 +38,8 @@ def main() -> None:
         screen.fill("black")
         score_surface = score_font.render(f"Score: {current_score}", True, ("white"))
         screen.blit(score_surface, (10, 10))
+        lives_surface = score_font.render(f"Lives: {lives}", True, ("white"))
+        screen.blit(lives_surface, (SCREEN_WIDTH - 120, 10))
         updatable.update(dt)
         for object in drawable:
             object.draw(screen)
@@ -48,11 +51,17 @@ def main() -> None:
                     current_score += calculate_points(asteroid.radius)
                     asteroid.split()
         for asteroid in asteroids:
-            if asteroid.collides_with(player) == True:
+            if player.invulnerable_timer <= 0 and asteroid.collides_with(player):
                 # log_event("player_hit")
-                print("Game over!")
-                print(f"Final Score: {current_score}")
-                sys.exit()
+                lives -= 1
+                if lives > 0:
+                    player.respawn()
+                    player.position = pygame.Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+                    player.velocity = pygame.Vector2(0, 0)
+                else:
+                    print("Game over!")
+                    print(f"Final Score: {current_score}")
+                    sys.exit()
         pygame.display.flip()
 
         # limit the framerate to 60 FPS

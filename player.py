@@ -1,6 +1,6 @@
 import pygame
 from circleshape import CircleShape
-from constants import LINE_WIDTH, PLAYER_RADIUS, PLAYER_TURN_SPEED, PLAYER_SPEED, PLAYER_SHOOT_SPEED, PLAYER_SHOOT_COOLDOWN_SECONDS, SCREEN_WIDTH, SCREEN_HEIGHT
+from constants import LINE_WIDTH, PLAYER_RADIUS, PLAYER_TURN_SPEED, PLAYER_ACCELERATION, PLAYER_SHOOT_SPEED, PLAYER_SHOOT_COOLDOWN_SECONDS, SCREEN_WIDTH, SCREEN_HEIGHT
 from shot import Shot
 
 
@@ -10,6 +10,7 @@ class Player(CircleShape):
         self.rotation = 0.0
         self.cooldown = 0
         self.invulnerable_timer = 0
+        self.velocity = pygame.Vector2(0, 0)
 
     def draw(self, screen: pygame.Surface) -> None:
         if self.invulnerable_timer <= 0 or int(self.invulnerable_timer * 10) % 2 == 0:
@@ -27,16 +28,11 @@ class Player(CircleShape):
         self.rotation += (PLAYER_TURN_SPEED * dt)
 
     def move(self, dt: float):
-        unit_vector = pygame.Vector2(0, 1)
-        rotated_vector = unit_vector.rotate(self.rotation)
-        rotated_with_speed_vector = rotated_vector * PLAYER_SPEED * dt
-        self.position += rotated_with_speed_vector
+        forward = pygame.Vector2(0, 1).rotate(self.rotation)
+        self.velocity += forward * PLAYER_ACCELERATION * dt
 
     def update(self, dt: float) -> None:
         keys = pygame.key.get_pressed()
-        self.cooldown -= dt
-        if self.invulnerable_timer > 0:
-            self.invulnerable_timer -= dt
 
         if keys[pygame.K_a] or keys[pygame.K_LEFT]:
             self.rotate(-dt)
@@ -49,7 +45,13 @@ class Player(CircleShape):
         if keys[pygame.K_SPACE] or keys[pygame.K_RETURN]:
             self.shoot()
 
+        self.position += self.velocity * dt
+        self.velocity *= 0.99
         self.wrap_position()
+
+        self.cooldown -= dt
+        if self.invulnerable_timer > 0:
+            self.invulnerable_timer -= dt
 
     def shoot(self) -> None:
         if self.cooldown > 0:
